@@ -25,5 +25,12 @@ export default class CurrentSale {
 
         return ammoPrice + otherPrice
     }
+
+    itemString(): string {
+        return this.items.map( o => o.name ).join(", ");
+    }
     
+    toJSON(): string {
+        return JSON.stringify(this.items);
+    }
 }

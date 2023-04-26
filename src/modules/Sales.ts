@@ -3,6 +3,7 @@ import Module from "../Module";
 import { ActionRowBuilder, EmbedBuilder, ModalBuilder, TextInputBuilder } from "@discordjs/builders";
 import CurrentSale from "../util/CurrentSale";
 import { ItemMap } from "../util/Item";
+import Sale from "../models/Sale";
 
 export default class Sales extends Module {
     name = "Sales"
@@ -26,7 +27,7 @@ export default class Sales extends Module {
 
                     const sale = new CurrentSale();
                     module.currentSales.set(interaction.user.id, sale);
-                    await interaction.reply({ content: "Success! Add items with /sales additem.", ephemeral: true });
+                    await interaction.reply({ content: "**Success!** Add items with /sales additem.", ephemeral: true });
                 },
             },
 
@@ -65,7 +66,7 @@ export default class Sales extends Module {
                         sale.items.push(item);
                     }
 
-                    await interaction.reply({ content: `Success! Added **${quantity}x ${item.name}** to the sale cart!`, ephemeral: true });
+                    await interaction.reply({ content: `**Success!** Added **${quantity}x ${item.name}** to the sale cart!`, ephemeral: true });
                 },
 
                 async autoComplete(interaction) {
@@ -96,8 +97,78 @@ export default class Sales extends Module {
                         return;
                     }
 
-                    await interaction.reply({ content: `The total price of your sale is: ${sale.calculatePrice()}C!`, ephemeral: true })
+                    await interaction.reply({ content: `The total price of your sale is: **${sale.calculatePrice()}C!**`, ephemeral: true })
                 },
+            },
+
+            {
+                name: "cancel",
+                builder: new SlashCommandSubcommandBuilder()
+                    .setDescription("Cancels any current order."),
+                async executor(interaction) {
+                    const sale = module.currentSales.get(interaction.user.id);
+                    if(!sale) {
+                        await interaction.reply({ content: "**Error!** No current sale was found. Start one with /sales start.", ephemeral: true });
+                        return;
+                    }
+
+                    module.currentSales.delete(interaction.user.id)
+                    await interaction.reply({ content: "**Success.** Cleared your current sale.", ephemeral: true });
+                }
+            },
+
+            {
+                name: "finish",
+                builder: new SlashCommandSubcommandBuilder()
+                    .setDescription("Finishes your current order")
+                    .addStringOption(o => o
+                        .setName("buyername")
+                        .setDescription("The buyer's IC name.")
+                        .setRequired(true)   
+                    )
+                    .addStringOption(o => o
+                        .setName("buyerguild")
+                        .setDescription("The buyer's guild.")
+                        .setRequired(false)    
+                    ),
+
+                async executor(interaction) {
+                    const sale = module.currentSales.get(interaction.user.id);
+                    if(!sale) {
+                        await interaction.reply({ content: "**Error!** No current sale was found. Start one with /sales start.", ephemeral: true });
+                        return;
+                    }
+
+                    const name = interaction.options.getString("buyername");
+                    const guild = interaction.options.getString("buyerguild", false) || "N/A"
+                    const member = interaction.guild.members.cache.get(interaction.user.id);
+                    const price = sale.calculatePrice();
+
+                    const embed = new EmbedBuilder()
+                        .setTitle(`SALE LOG - ${member.displayName}`)
+                        .addFields(
+                            { name: "TOTAL", value: `${price.toString()} credits` },
+                            { name: "ITEMS", value: sale.itemString() },
+                            { name: "GUILD", value: guild },
+                            { name: "BUYER", value: name }
+                        )
+                        .setColor(0x8934eb);
+                    
+                    await module.channel.send({ embeds: [embed] });
+
+                    const saleDB = new Sale({
+                        sellerID: interaction.user.id,
+                        buyer: name,
+                        buyerGuild: guild,
+                        items: sale.toJSON(),
+                        total: price
+                    });
+
+                    await saleDB.save();
+                    await interaction.reply({ content: "Sale has been logged and saved in the database. **Congratulations!**", ephemeral: true });
+                    
+                    module.currentSales.delete(interaction.user.id);
+                }
             }
         )
     }
@@ -110,9 +181,5 @@ export default class Sales extends Module {
         }
 
         this.channel = newChnl
-    }
-
-    async onModalSubmit(interaction: ModalSubmitInteraction<CacheType>): Promise<void> {
-        
     }
 }

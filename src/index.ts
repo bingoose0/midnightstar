@@ -46,7 +46,6 @@ client.once("ready", async (client: Client<true>) => {
     await rest.put(Routes.applicationCommands(client.application.id), { body: commands });
     logger.debug("Command data sent")
 
-
     logger.info("Loaded! Ready to use.");
 })
 
@@ -87,3 +86,5 @@ client.on("interactionCreate", (interaction) => {
         }
     }
 })
+
+mongoose.connect(process.env.MONGO);
