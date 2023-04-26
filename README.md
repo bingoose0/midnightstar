@@ -1,2 +1,2 @@
 # midnightstar
-A repository containing a Discord Bot for Midnight Star
+Repository containing a Discord Bot for Midnight Star

@@ -1,4 +1,4 @@
-import { Client, REST, Routes, SlashCommandBuilder } from "discord.js";
+import { Client, GatewayIntentBits, IntentsBitField, REST, Routes, SlashCommandBuilder } from "discord.js";
 import * as mongoose from "mongoose";
 import * as dotenv from "dotenv";
 import * as fs from "fs";
@@ -11,7 +11,7 @@ dotenv.config();
 const token = process.env.TOKEN || "missing_token"
 const mongoUrl = process.env.MONGO || "missing_url"
 
-const client = new Client({ intents: 513 });
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildEmojisAndStickers] });
 client.login(process.env.TOKEN);
 
 const modules = new Array<Module>();
@@ -20,7 +20,7 @@ const commands = new Array<SlashCommandBuilder>();
 const rest = new REST({ version: "10" }).setToken(token);
 const logger = new Logger("Main");
 
-client.on("ready", async (client: Client<true>) => {
+client.once("ready", async (client: Client<true>) => {
     logger.info("Ready called, loading modules...");
 
     const moduleFiles = fs.readdirSync("src/modules").map(f => {
@@ -65,6 +65,25 @@ client.on("interactionCreate", (interaction) => {
             })
 
             break;
+        }
+    } else if(interaction.isAutocomplete()) {
+        for(const key in modules) {
+            const module = modules[key];
+            if(module.name.toLowerCase() != interaction.commandName) continue;
+
+            module.commands.forEach(command => {
+                if(command.name != interaction.options.getSubcommand(true) || !command.autoComplete) return;
+
+                logger.debug("Running command", command.name);
+                command.autoComplete(interaction)
+            })
+
+            break;
+        }
+    } else if(interaction.isModalSubmit()) {
+        for(const key in modules) {
+            const module = modules[key];
+            module.onModalSubmit(interaction);
         }
     }
 })

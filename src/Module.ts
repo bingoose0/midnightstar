@@ -1,4 +1,4 @@
-import { Client, SlashCommandBuilder } from "discord.js";
+import { Client, ModalSubmitInteraction, SlashCommandBuilder } from "discord.js";
 import { Logger } from "./util/Logger";
 import Command from "./util/Command";
 
@@ -13,11 +13,15 @@ export default class Module {
         this.client = client;
         
         this.createCommands();
+        this.onReady()
     }
 
+    // Empty functions
     createCommands() {}
     onReady() { }
+    onModalSubmit(interaction: ModalSubmitInteraction) { };
 
+    // Creates the SlashCommandBuilder
     createCommand() {
         const command = new SlashCommandBuilder();
         command.setName(this.name.toLowerCase());
