@@ -1,2 +1,2 @@
 @echo off
-ts-node src/app
+ts-node src
