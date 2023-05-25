@@ -14,6 +14,7 @@ export default class Sales extends Module {
         const module = this;
 
         this.commands.push(
+            // Starts a sale
             {
                 name: "start",
                 builder: new SlashCommandSubcommandBuilder()
@@ -30,7 +31,8 @@ export default class Sales extends Module {
                     await interaction.reply({ content: "**Success!** Add items with /sales additem.", ephemeral: true });
                 },
             },
-
+            
+            // Adds an item to a sale
             {
                 name: "additem",
                 builder: new SlashCommandSubcommandBuilder()
@@ -85,7 +87,8 @@ export default class Sales extends Module {
                     await interaction.respond(data)
                 },
             },
-
+            
+            // Calculates the total price of a sale
             {
                 name: "price",
                 builder: new SlashCommandSubcommandBuilder()
@@ -100,7 +103,8 @@ export default class Sales extends Module {
                     await interaction.reply({ content: `The total price of your sale is: **${sale.calculatePrice()}C!**`, ephemeral: true })
                 },
             },
-
+            
+            // Cancels a sale
             {
                 name: "cancel",
                 builder: new SlashCommandSubcommandBuilder()
@@ -116,7 +120,8 @@ export default class Sales extends Module {
                     await interaction.reply({ content: "**Success.** Cleared your current sale.", ephemeral: true });
                 }
             },
-
+            
+            // Finishes a sale, logging it and saving it in the database
             {
                 name: "finish",
                 builder: new SlashCommandSubcommandBuilder()
@@ -144,6 +149,10 @@ export default class Sales extends Module {
                     const member = interaction.guild.members.cache.get(interaction.user.id);
                     const price = sale.calculatePrice();
 
+                    if(price <= 1) {
+                        return await interaction.reply({ content: "**Error!** The price must not be 0 or below."});
+                    }
+
                     const embed = new EmbedBuilder()
                         .setTitle(`SALE LOG - ${member.displayName}`)
                         .addFields(
@@ -165,7 +174,7 @@ export default class Sales extends Module {
                     });
 
                     await saleDB.save();
-                    await interaction.reply({ content: "Sale has been logged and saved in the database. **Congratulations!**", ephemeral: true });
+                    await interaction.reply({ content: "Sale has been logged and saved in the database.", ephemeral: true });
                     
                     module.currentSales.delete(interaction.user.id);
                 }
