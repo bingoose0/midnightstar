@@ -153,11 +153,13 @@ export default class Sales extends Module {
                         return await interaction.reply({ content: "**Error!** The price must not be 0 or below."});
                     }
 
+                    const iString = sale.itemString()
+    
                     const embed = new EmbedBuilder()
                         .setTitle(`SALE LOG - ${member.displayName}`)
                         .addFields(
                             { name: "TOTAL", value: `${price.toString()} credits` },
-                            { name: "ITEMS", value: sale.itemString() },
+                            { name: "ITEMS", value: iString },
                             { name: "GUILD", value: guild },
                             { name: "BUYER", value: name }
                         )
@@ -169,8 +171,9 @@ export default class Sales extends Module {
                         sellerID: interaction.user.id,
                         buyer: name,
                         buyerGuild: guild,
-                        items: sale.toJSON(),
-                        total: price
+                        items: iString,
+                        total: price,
+                        timestamp: Date.now()
                     });
 
                     await saleDB.save();

@@ -59,7 +59,7 @@ client.on("interactionCreate", (interaction) => {
             module.commands.forEach(command => {
                 if(command.name != interaction.options.getSubcommand(true)) return;
 
-                logger.debug("Running command", command.name);
+                logger.debug("Running command", command.name, "from", `${interaction.user.username} (${interaction.user.id})`);
                 command.executor(interaction)
             })
 
