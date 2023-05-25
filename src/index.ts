@@ -87,4 +87,12 @@ client.on("interactionCreate", (interaction) => {
     }
 })
 
+client.on("guildMemberAdd", member => {
+    if(!process.env.UNASSIGNED_ROLE) {
+        return logger.error("Error! Unassigned role is not set in .env!")
+    }
+
+    member.roles.add(process.env.UNASSIGNED_ROLE).then(m => logger.debug(`User ${member.displayName} (${member.id}) joined. Assigned unranked role.`));
+})
+
 mongoose.connect(process.env.MONGO);
