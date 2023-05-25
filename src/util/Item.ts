@@ -21,6 +21,8 @@ ItemList.push(
     { name: "SPAS-12 Shotgun", price: 600, id: "spas", type: "weapon" },
     { name: "Remington M870", price: 850, id: "m870", type: "weapon" },
     { name: "AK47", price: 550, id: "ak", type: "weapon" },
+    { name: "SIG MCX", price: 550, id: "sigmcx", type: "weapon" },
+    { name: "Mini 14", price: 800, id: "m14", type: "weapon" },
     { name: ".357 Revolver", price: 650, id: "357", type: "weapon" },
     { name: "M60 Machine Gun", price: 1000, id: "m60", type: "weapon" },
     { name: "Mosin-Nagant", price: 1100, id: "mosin", type: "weapon" },
