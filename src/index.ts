@@ -1,4 +1,4 @@
-import { Client, GatewayIntentBits, IntentsBitField, REST, Routes, SlashCommandBuilder } from "discord.js";
+import { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder } from "discord.js";
 import * as mongoose from "mongoose";
 import * as dotenv from "dotenv";
 import * as fs from "fs";
@@ -102,4 +102,4 @@ client.on("guildMemberAdd", member => {
     member.roles.add(process.env.UNASSIGNED_ROLE).then(m => logger.debug(`User ${member.displayName} (${member.id}) joined. Assigned unranked role.`));
 })
 
-mongoose.connect(process.env.MONGO);
+mongoose.connect(mongoUrl);
