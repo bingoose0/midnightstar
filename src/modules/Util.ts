@@ -1,4 +1,4 @@
-import { APIEmbedField, AutoModerationActionExecution, EmbedBuilder, SlashCommandSubcommandBuilder } from "discord.js";
+import { APIEmbedField, ActionRow, ActionRowBuilder, AutoModerationActionExecution, EmbedBuilder, Events, InteractionCollector, ModalBuilder, PermissionFlagsBits, SlashCommandSubcommandBuilder, TextInputBuilder, TextInputStyle } from "discord.js";
 import Module from "../Module";
 import { ItemList } from "../util/Item";
 
@@ -57,7 +57,54 @@ export default class Util extends Module {
     
                     await interaction.reply({ embeds: [embed], ephemeral: true })
                 }
+            },
+            {
+                name: "say",
+                builder: new SlashCommandSubcommandBuilder()
+                    .setDescription("Says something via the bot")
+                    .addChannelOption(o => o.setName("channel").setDescription("Channel to send to").setRequired(true)),
+                permissions: [PermissionFlagsBits.Administrator],
+                async executor(interaction) {
+                    const channel = interaction.options.getChannel("channel")
+                    const modal = new ModalBuilder()
+                        .setCustomId(`say_${channel.id}`)
+                        .setTitle("Message");
+                    
+                    const input = new TextInputBuilder()
+                        .setCustomId("message")
+                        .setLabel("Message to print")
+                        .setStyle(TextInputStyle.Paragraph);
+                    
+                    const row = new ActionRowBuilder<TextInputBuilder>().addComponents(input)
+        
+                    modal.addComponents(row);
+                    await interaction.showModal(modal);
+                }
             }
         )
+    }
+
+    onReady(): void {
+        this.client.on(Events.InteractionCreate, interaction => {
+            if(!interaction.isModalSubmit() || !interaction.customId.startsWith("say_")) return;
+            const message = interaction.fields.getTextInputValue("message");
+
+            const idSplit = interaction.customId.split("say_");
+            const channelID = idSplit[1]
+            if(!channelID) {
+                interaction.reply({ content: `Channel ID was not valid, please report this to Bingu. In case you needed it, here is your text:\n${message}`, ephemeral: true })
+                return;
+            };
+
+            const channel = interaction.guild.channels.cache.get(channelID);
+            if(!channel || !channel.isTextBased()) {
+                interaction.reply({ content: `The channel could not be found or is not text-based. In case you needed it, here is your text:\n${message}`, ephemeral: true })
+                return;
+            }
+    
+            channel.send(message);
+
+            interaction.reply({ content: "**Success!**", ephemeral: true })
+        })
     }
 }

@@ -30,7 +30,6 @@ export default class Module {
         for(const key in this.commands) {
             const subCmd = this.commands[key];
             subCmd.builder.setName(subCmd.name.toLowerCase());
-
             command.addSubcommand(subCmd.builder);
         }
 

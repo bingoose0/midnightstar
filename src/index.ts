@@ -52,12 +52,19 @@ client.once("ready", async (client: Client<true>) => {
 // Handles interactions
 client.on("interactionCreate", (interaction) => {
     if(interaction.isChatInputCommand()) {
+        const member = interaction.guild.members.cache.get(interaction.user.id);
+        if(!member) return; // TODO: error message
+
         for(const key in modules) {
             const module = modules[key];
             if(module.name.toLowerCase() != interaction.commandName) continue;
 
             module.commands.forEach(command => {
                 if(command.name != interaction.options.getSubcommand(true)) return;
+                if(!member.permissions.has(command.permissions)) {
+                    interaction.reply({ content: ":x: **You cannot use this command.**", ephemeral: true })
+                    return
+                }
 
                 logger.debug("Running command", command.name, "from", `${interaction.user.username} (${interaction.user.id})`);
                 command.executor(interaction)
