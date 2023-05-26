@@ -223,13 +223,13 @@ If you're still interested, we'd love to have ya. We've got an alien empire to b
             } else if(interaction.isButton() && interaction.customId.startsWith("verif")) {
                 // Modify message
                 const accept = new ButtonBuilder()
-                    .setCustomId("5t4rey54rty4")
+                    .setCustomId("_verifaccept")
                     .setLabel("Accept")
                     .setStyle(ButtonStyle.Success)
                     .setDisabled(true);
                 
                 const deny = new ButtonBuilder()
-                    .setCustomId("45ertyh4uhy")
+                    .setCustomId("_verifdeny")
                     .setLabel("Deny")
                     .setStyle(ButtonStyle.Danger)
                     .setDisabled(true);
@@ -237,7 +237,7 @@ If you're still interested, we'd love to have ya. We've got an alien empire to b
                 const row = new ActionRowBuilder<ButtonBuilder>()
                     .addComponents(accept, deny);
                 
-                await interaction.message.edit({ components: [row] })
+                await interaction.message.edit({ content: interaction.customId.startsWith("verifaccept") ? "**Accepted**" : "**Denied**", components: [row] })
                 
                 // Get member
                 const idSplit = interaction.customId.split("_")
@@ -246,7 +246,7 @@ If you're still interested, we'd love to have ya. We've got an alien empire to b
                 if(!id) {
                     return this.logger.error("Invalid ID provided in verify customID!");
                 }
-        
+
                 const member = interaction.guild.members.cache.get(id);
                 if(!member) {
                     await interaction.reply({ content: "This person either left the discord, or does not exist on the bot's cache.", ephemeral: true })
@@ -271,7 +271,7 @@ If you're still interested, we'd love to have ya. We've got an alien empire to b
                     } catch(e) {
                         return;
                     }
-                } else if (idSplit[1] == "verifdeny") {
+                } else if (idSplit[0] == "verifdeny") {
                     await interaction.reply({ content: `Denied member ${member}`, ephemeral: true });
                     try {
                         await member.send("Hello. Your application to Midnight Star has been **denied**. For further information, contact a director.");
