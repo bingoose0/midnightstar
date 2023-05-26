@@ -188,6 +188,11 @@ export default class Util extends Module {
                     await interaction.reply({ content: "Internal error! Member could not be found, please try again later.", ephemeral: true })
                     return this.logger.error(`Member could not be found for ${interaction.user.username} (${interaction.user.id})!`)
                 }
+
+                if(!member.roles.cache.has(process.env.UNASSIGNED_ROLE)) {
+                    await interaction.reply({ content: "You're already verified.", ephemeral: true })
+                    return;
+                }
     
                 const modal = new ModalBuilder()
                     .setCustomId("ms-verify")
