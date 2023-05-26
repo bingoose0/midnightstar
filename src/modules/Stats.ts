@@ -38,11 +38,12 @@ export default class Stats extends Module {
                             value: "**TOTAL**: " + element.total
                                 + `\n**ITEMS**: ${element.items}`
                                 + `\n**BUYER GUILD**: ${element.buyerGuild}`
-                                + `\n**DATE OF PURCHASE**: ${date.toLocaleDateString("en-US")} ${date.toLocaleTimeString("en-US")} (${Intl.DateTimeFormat().resolvedOptions().timeZone})`
+                                + `\n**DATE OF PURCHASE**: ${date}`
                         })
                     }
 
-                    embed.setDescription(`**TOTAL MADE**: ${moneyMade}C`)
+                    embed.setDescription(`**TOTAL MADE**: ${moneyMade}C`);
+                    embed.setFooter({ text: `Data generated at ${new Date()}`})
                     await interaction.reply({ embeds: [embed], ephemeral: true })
                 }
             }

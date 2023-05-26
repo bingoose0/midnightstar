@@ -153,8 +153,9 @@ export default class Sales extends Module {
                         return await interaction.reply({ content: "**Error!** The price must not be 0 or below."});
                     }
 
-                    const iString = sale.itemString()
-    
+                    const iString = sale.itemString();
+                    const date = new Date();
+        
                     const embed = new EmbedBuilder()
                         .setTitle(`SALE LOG - ${member.displayName}`)
                         .addFields(
@@ -163,8 +164,8 @@ export default class Sales extends Module {
                             { name: "GUILD", value: guild },
                             { name: "BUYER", value: name }
                         )
-                        .setColor(0x8934eb);
-                    
+                        .setColor(0x8934eb)
+                        .setFooter({ "text": date.toString() })
                     await module.channel.send({ embeds: [embed] });
 
                     const saleDB = new Sale({
@@ -173,7 +174,7 @@ export default class Sales extends Module {
                         buyerGuild: guild,
                         items: iString,
                         total: price,
-                        timestamp: Date.now()
+                        timestamp: date
                     });
 
                     await saleDB.save();
