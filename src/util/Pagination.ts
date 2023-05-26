@@ -54,7 +54,7 @@ export default async function CreatePaginator(pages: Array<string>, interaction:
         nextButton.setDisabled(i == pages.length - 1);
         lastButton.setDisabled(i == 0);
 
-        curPage = pages[i];
+        curPage = pages[i].slice(0, 2000);
 
         const replyData = { embeds: [{ title: `Page ${i}`, description: curPage }], components: [row], ephemeral: ephemeral }
         await int.update(replyData);
