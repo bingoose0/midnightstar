@@ -1,6 +1,5 @@
-import { APIEmbedField, AutoModerationActionExecution, EmbedBuilder, PermissionFlagsBits, PermissionsBitField, SlashCommandSubcommandBuilder } from "discord.js";
+import { PermissionFlagsBits, SlashCommandSubcommandBuilder } from "discord.js";
 import Module from "../Module";
-import { ItemList } from "../util/Item";
 import Sale from "../models/Sale";
 
 
@@ -25,7 +24,7 @@ export default class Stats extends Module {
                         return interaction.reply({ content: "User has made no logged sales.", ephemeral: true });
                     }
 
-                    const embed = new EmbedBuilder();
+                    let curText = ""
                     const result = await Sale.find({ sellerID: user.id }).sort({ timestamp: -1 });
                     let moneyMade = 0;
                     for (const key in result) {
@@ -33,18 +32,21 @@ export default class Stats extends Module {
                         moneyMade += element.total;
                 
                         const date = new Date(element.timestamp || 0)
-                        embed.addFields({
-                            name: "Sales Log - " + element.buyer,
-                            value: "**TOTAL**: " + element.total
-                                + `\n**ITEMS**: ${element.items}`
-                                + `\n**BUYER GUILD**: ${element.buyerGuild}`
-                                + `\n**DATE OF PURCHASE**: ${date}`
-                        })
+                        const text = `
+                        ## Sales Log - ${element.buyer} 
+                        **TOTAL**: ${element.total}
+                        **ITEMS**: ${element.items}
+                        **BUYER GUILD**: ${element.buyerGuild}
+                        **DATE OF PURCHASE**: ${date}
+                        `
+
+                        curText += text
                     }
 
-                    embed.setDescription(`**TOTAL MADE**: ${moneyMade}C`);
-                    embed.setFooter({ text: `Data generated at ${new Date()}`})
-                    await interaction.reply({ embeds: [embed], ephemeral: true })
+                    if(curText.length > 2000) {
+                        return interaction.reply({ content: "Unfortunately the amount of sales for this user exceeds the text limit for Discord, please try entering a lower time.", ephemeral: true })
+                    }
+                    await interaction.reply({ content: curText, ephemeral: true })
                 }
             }
         )

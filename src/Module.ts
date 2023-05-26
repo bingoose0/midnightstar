@@ -1,4 +1,4 @@
-import { Client, ModalSubmitInteraction, SlashCommandBuilder } from "discord.js";
+import { Client, GuildChannel, ModalSubmitInteraction, SlashCommandBuilder } from "discord.js";
 import { Logger } from "./util/Logger";
 import Command from "./util/Command";
 
@@ -34,5 +34,15 @@ export default class Module {
         }
 
         return command;
+    }
+
+    async findChannel(id: string) {
+        const channelCache = this.client.channels.cache.get(id);
+        if(!channelCache) {
+            const channelFetch = await this.client.channels.fetch(id);
+            return channelFetch;
+        }
+
+        return channelCache;
     }
 }

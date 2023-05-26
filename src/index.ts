@@ -36,7 +36,9 @@ client.once("ready", async (client: Client<true>) => {
 
         module.initialize(client);
         modules.push(module);
-        commands.push(module.createCommand());
+        if(module.commands.length > 0) {
+            commands.push(module.createCommand());
+        }
 
         logger.debug("Loaded module", module.name);
     }

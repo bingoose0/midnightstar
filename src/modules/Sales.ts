@@ -186,13 +186,17 @@ export default class Sales extends Module {
         )
     }
 
-    onReady(): void {
-        const newChnl = this.client.channels.cache.get(process.env.SALES_CHANNEL_ID);
+    async onReady() {
+        const newChannel = await this.findChannel(process.env.SALES_CHANNEL_ID);
 
-        if(!newChnl.isTextBased()) {
+        if(!newChannel) {
+            return this.logger.error("Sales log channel is not valid!");
+        }
+
+        if(!newChannel.isTextBased()) {
             return this.logger.error("Sales log channel is not a text channel!");
         }
 
-        this.channel = newChnl
+        this.channel = newChannel
     }
 }
