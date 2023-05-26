@@ -1,6 +1,7 @@
 import { PermissionFlagsBits, SlashCommandSubcommandBuilder } from "discord.js";
 import Module from "../Module";
 import Sale from "../models/Sale";
+import CreatePaginator from "../util/Pagination";
 
 
 export default class Stats extends Module {
@@ -24,29 +25,19 @@ export default class Stats extends Module {
                         return interaction.reply({ content: "User has made no logged sales.", ephemeral: true });
                     }
 
-                    let curText = ""
+                    let pages = []
                     const result = await Sale.find({ sellerID: user.id }).sort({ timestamp: -1 });
-                    let moneyMade = 0;
-                    for (const key in result) {
-                        const element = result[key];        
-                        moneyMade += element.total;
-                
-                        const date = new Date(element.timestamp || 0)
-                        const text = `
-                        ## Sales Log - ${element.buyer} 
-                        **TOTAL**: ${element.total}
-                        **ITEMS**: ${element.items}
-                        **BUYER GUILD**: ${element.buyerGuild}
-                        **DATE OF PURCHASE**: ${date}
-                        `
-
-                        curText += text
+                    
+                    for(const key in result) {
+                        const element = result[key];
+                        pages.push(`
+                        **Buyer:** ${element.buyer} (${element.buyerGuild})
+                        **Total:** ${element.total}
+                        **Items:** ${element.items}
+                        `)
                     }
 
-                    if(curText.length > 2000) {
-                        return interaction.reply({ content: "Unfortunately the amount of sales for this user exceeds the text limit for Discord, please try entering a lower time.", ephemeral: true })
-                    }
-                    await interaction.reply({ content: curText, ephemeral: true })
+                    await CreatePaginator(pages, interaction, true);
                 }
             }
         )
