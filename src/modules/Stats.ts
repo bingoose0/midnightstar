@@ -27,9 +27,11 @@ export default class Stats extends Module {
 
                     const embed = new EmbedBuilder();
                     const result = await Sale.find({ sellerID: user.id }).sort({ timestamp: -1 });
+                    let moneyMade = 0;
                     for (const key in result) {
-                        const element = result[key];
-                        
+                        const element = result[key];        
+                        moneyMade += element.total;
+                
                         const date = new Date(element.timestamp || 0)
                         embed.addFields({
                             name: "Sales Log - " + element.buyer,
@@ -40,6 +42,7 @@ export default class Stats extends Module {
                         })
                     }
 
+                    embed.setDescription(`**TOTAL MADE**: ${moneyMade}C`)
                     await interaction.reply({ embeds: [embed], ephemeral: true })
                 }
             }
