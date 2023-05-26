@@ -1,4 +1,4 @@
-import { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder } from "discord.js";
+import { Client, Events, GatewayIntentBits, REST, Routes, SlashCommandBuilder } from "discord.js";
 import * as mongoose from "mongoose";
 import * as dotenv from "dotenv";
 import * as fs from "fs";
@@ -20,7 +20,7 @@ const commands = new Array<SlashCommandBuilder>();
 const rest = new REST({ version: "10" }).setToken(token);
 const logger = new Logger("Main");
 
-client.once("ready", async (client: Client<true>) => {
+client.once(Events.ClientReady, async (client: Client<true>) => {
     logger.info("Ready called, loading modules...");
 
     const moduleFiles = fs.readdirSync("src/modules").map(f => {
@@ -52,7 +52,7 @@ client.once("ready", async (client: Client<true>) => {
 })
 
 // Handles interactions
-client.on("interactionCreate", (interaction) => {
+client.on(Events.InteractionCreate, (interaction) => {
     if(interaction.isChatInputCommand()) {
         const member = interaction.guild.members.cache.get(interaction.user.id);
         if(!member) return; // TODO: error message
@@ -107,7 +107,7 @@ client.on("interactionCreate", (interaction) => {
     }
 })
 
-client.on("guildMemberAdd", member => {
+client.on(Events.GuildMemberAdd, member => {
     if(!process.env.UNASSIGNED_ROLE) {
         return logger.error("Error! Unassigned role is not set in .env!")
     }
