@@ -155,31 +155,130 @@ If you're still interested, we'd love to have ya. We've got an alien empire to b
 
                 interaction.reply({ content: "**Success!**", ephemeral: true })
             } else if(interaction.isMessageComponent() && interaction.customId == "ms_buttonok") {
-                const role = process.env.UNASSIGNED_ROLE;
                 const member = interaction.guild.members.cache.get(interaction.user.id);
                 if(!member) {
                     await interaction.reply({ content: "Internal error! Member could not be found, please try again later.", ephemeral: true })
                     return this.logger.error(`Member could not be found for ${interaction.user.username} (${interaction.user.id})!`)
                 }
-
-                if(member.roles.cache.has(role)) {
-                    await member.roles.remove(role);
-                }
-
-                const entryRoleID = process.env.NEW_ENTRY_ROLE;
-                if(!entryRoleID) {
-                    await interaction.reply({ content: "The bot developer/operator forgot to setup the new entry role, please contact them!", ephemeral: true })
-                    return this.logger.error("New entry role is not set!")
-                }
-
-                if(!interaction.guild.roles.cache.has(entryRoleID)) {
-                    await interaction.reply({ content: "The bot developer/operator entered the wrong new entry role ID, please contact them!", ephemeral: true })
-                    return this.logger.error("New entry role is not valid!")
-                }
     
-                await member.roles.add(entryRoleID);
+                const modal = new ModalBuilder()
+                    .setCustomId("ms-verify")
+                    .setTitle("Form");
+                
+                const firstInput = new TextInputBuilder()
+                    .setCustomId("firstInput")
+                    .setLabel("What do you want out of Midnight Star?")
+                    .setStyle(TextInputStyle.Paragraph)
+                    .setMaxLength(800);
+                
+                const secondInput = new TextInputBuilder()
+                    .setCustomId("secondInput")
+                    .setLabel("What do you want to do within Midnight Star?")
+                    .setStyle(TextInputStyle.Paragraph)
+                    .setMaxLength(800);
 
-                interaction.reply({ content: "Welcome!", ephemeral: true })
+
+                const firstRow = new ActionRowBuilder<TextInputBuilder>().addComponents(firstInput);
+                const secondRow = new ActionRowBuilder<TextInputBuilder>().addComponents(secondInput);
+
+                modal.addComponents(firstRow, secondRow);
+
+                await interaction.showModal(modal);
+            } else if(interaction.isModalSubmit() && interaction.customId == "ms-verify") {
+                const logChannel = await this.findChannel(process.env.LOGS_CHANNEL_ID);
+                if(!logChannel || !logChannel.isTextBased()) {
+                    this.logger.error("Logs channel is not set/valid! (LOGS_CHANNEL_ID)");
+                    await interaction.reply({ content: "Unfortunately the logs channel ID is not configured correctly, please notify the bot developer of this.", ephemeral: true });
+                    return;
+                }
+
+                const embed = new EmbedBuilder();
+                embed.setTitle(`NEW APPLICATION - ${interaction.user.username} (${interaction.user.id})`)
+                embed.addFields(
+                    {
+                        name: "What do you want out of Midnight Star?",
+                        value: interaction.fields.getTextInputValue("firstInput")
+                    },
+                    {
+                        name: "What do you want to do within Midnight Star?",
+                        value: interaction.fields.getTextInputValue("secondInput")
+                    }
+                )
+
+                const accept = new ButtonBuilder()
+                    .setCustomId("verifaccept_" + interaction.user.id)
+                    .setLabel("Accept")
+                    .setStyle(ButtonStyle.Success);
+                
+                const deny = new ButtonBuilder()
+                    .setCustomId("verifdeny_" + interaction.user.id)
+                    .setLabel("Deny")
+                    .setStyle(ButtonStyle.Danger);
+
+                const row = new ActionRowBuilder<ButtonBuilder>()
+                    .addComponents(accept, deny);
+                
+                await logChannel.send({ embeds: [embed], components: [row] })
+                await interaction.reply({ content: "Success! Please wait for your application to be looked over.", ephemeral: true })
+            } else if(interaction.isButton() && interaction.customId.startsWith("verif")) {
+                // Modify message
+                const accept = new ButtonBuilder()
+                    .setCustomId("5t4rey54rty4")
+                    .setLabel("Accept")
+                    .setStyle(ButtonStyle.Success)
+                    .setDisabled(true);
+                
+                const deny = new ButtonBuilder()
+                    .setCustomId("45ertyh4uhy")
+                    .setLabel("Deny")
+                    .setStyle(ButtonStyle.Danger)
+                    .setDisabled(true);
+
+                const row = new ActionRowBuilder<ButtonBuilder>()
+                    .addComponents(accept, deny);
+                
+                await interaction.message.edit({ components: [row] })
+                
+                // Get member
+                const idSplit = interaction.customId.split("_")
+                const id = idSplit[1];
+
+                if(!id) {
+                    return this.logger.error("Invalid ID provided in verify customID!");
+                }
+        
+                const member = interaction.guild.members.cache.get(id);
+                if(!member) {
+                    await interaction.reply({ content: "This person either left the discord, or does not exist on the bot's cache.", ephemeral: true })
+                    return;
+                }
+
+                // CHange user roles
+                if(idSplit[0] == "verifaccept") {
+                    const entryRoleID = process.env.NEW_ENTRY_ROLE;
+                    const unrankedRoleID = process.env.UNASSIGNED_ROLE;
+
+                    if(!member.roles.cache.has(unrankedRoleID) && member.roles.cache.has(entryRoleID)) {
+                        return;
+                    }
+
+                    await member.roles.remove(unrankedRoleID);
+                    await member.roles.add(entryRoleID);
+
+                    await interaction.reply({ content: `Accepted member ${member}`, ephemeral: true });
+                    try {
+                        await member.send("Your application to Midnight Star has been **accepted**! Please contact a Scav Director for training.")
+                    } catch(e) {
+                        return;
+                    }
+                } else if (idSplit[1] == "verifdeny") {
+                    await interaction.reply({ content: `Denied member ${member}`, ephemeral: true });
+                    try {
+                        await member.send("Hello. Your application to Midnight Star has been **denied**. For further information, contact a director.");
+                    } catch(e) {
+                        return;
+                    }
+                }
             }
         })
     }
