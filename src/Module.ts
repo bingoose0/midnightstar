@@ -1,4 +1,4 @@
-import { Client, GuildChannel, ModalSubmitInteraction, SlashCommandBuilder } from "discord.js";
+import { Client, GuildChannel, ModalSubmitInteraction, PermissionResolvable, SlashCommandBuilder } from "discord.js";
 import { Logger } from "./util/Logger";
 import Command from "./util/Command";
 
@@ -7,7 +7,8 @@ export default class Module {
     logger: Logger;
     client: Client<true>;
     commands: Array<Command> = new Array<Command>();
-    
+    permissions: bigint;
+
     initialize(client: Client<true>) {
         this.logger = new Logger(this.name);
         this.client = client;
@@ -27,6 +28,9 @@ export default class Module {
         command.setName(this.name.toLowerCase());
         command.setDescription(`The ${this.name} module command containing all subcommands`);
 
+        if(this.permissions) {
+            command.setDefaultMemberPermissions(this.permissions)
+        }
         for(const key in this.commands) {
             const subCmd = this.commands[key];
             subCmd.builder.setName(subCmd.name.toLowerCase());

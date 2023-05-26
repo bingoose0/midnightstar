@@ -63,13 +63,15 @@ client.on("interactionCreate", (interaction) => {
 
             module.commands.forEach(command => {
                 if(command.name != interaction.options.getSubcommand(true)) return;
+                // Check if permissions are added
                 if(!member.permissions.has(command.permissions)) {
                     interaction.reply({ content: ":x: **You cannot use this command.**", ephemeral: true });
                     return;
                 }
 
                 logger.debug("Running command", command.name, "from", `${interaction.user.username} (${interaction.user.id})`);
-                try{
+                // Run command callback
+                try {
                     command.executor(interaction);
                 } catch(e) {
                     logger.error(`${command.name} error: ${e}`);

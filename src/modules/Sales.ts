@@ -1,4 +1,4 @@
-import { CacheType, Guild, ModalSubmitInteraction, SlashCommandSubcommandBuilder, TextBasedChannel, TextChannel, TextInputStyle } from "discord.js";
+import { CacheType, Guild, ModalSubmitInteraction, PermissionFlagsBits, SlashCommandSubcommandBuilder, TextBasedChannel, TextChannel, TextInputStyle } from "discord.js";
 import Module from "../Module";
 import { ActionRowBuilder, EmbedBuilder, ModalBuilder, TextInputBuilder } from "@discordjs/builders";
 import CurrentSale from "../util/CurrentSale";
@@ -60,10 +60,21 @@ export default class Sales extends Module {
                     const quantity = interaction.options.getNumber("quantity");
                     const item = ItemMap.get(itemID);
                     if(!item) {
-                        await interaction.reply({ content: "**ERROR!** The item was not found! This should usually never happen, please contact the bot owner!!", ephemeral: true });
+                        await interaction.reply({ content: "**Error!** The item was not found! This should usually never happen, please contact the bot owner!", ephemeral: true });
                         return;
                     }
 
+                    const member = interaction.guild.members.cache.get(interaction.user.id);
+                    if(!member) {
+                        await interaction.reply({ content: "**Error!** The member could not be found. This is an internal bot issue, please contact the bot owner.", ephemeral: true });
+                        return;
+                    }
+            
+                    if(sale.items.length + quantity > 30 && !member.permissions.has(PermissionFlagsBits.Administrator)) {
+                        await interaction.reply({ content: "**Error!** This amount goes over the order limit (30), please contact an admin to process this order.", ephemeral: true })
+                        return;
+                    }
+        
                     for (let index = 0; index < quantity; index++) {
                         sale.items.push(item);
                     }
@@ -182,7 +193,7 @@ export default class Sales extends Module {
                     
                     module.currentSales.delete(interaction.user.id);
                 }
-            }
+            },
         )
     }
 
