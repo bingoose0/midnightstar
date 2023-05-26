@@ -1,1 +1,1 @@
-pm2 start ts-node -- -P tsconfig.json ./src/index.ts -n midnightstar
+pm2 start ts-node -- --name midnightstar -P tsconfig.json ./src/index.ts 
