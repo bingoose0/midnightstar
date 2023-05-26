@@ -64,12 +64,17 @@ client.on("interactionCreate", (interaction) => {
             module.commands.forEach(command => {
                 if(command.name != interaction.options.getSubcommand(true)) return;
                 if(!member.permissions.has(command.permissions)) {
-                    interaction.reply({ content: ":x: **You cannot use this command.**", ephemeral: true })
-                    return
+                    interaction.reply({ content: ":x: **You cannot use this command.**", ephemeral: true });
+                    return;
                 }
 
                 logger.debug("Running command", command.name, "from", `${interaction.user.username} (${interaction.user.id})`);
-                command.executor(interaction)
+                try{
+                    command.executor(interaction);
+                } catch(e) {
+                    logger.error(`${command.name} error: ${e}`);
+                    interaction.reply({ content: "Unfortunately an error was created, please report this to the bot developer!", ephemeral: true })
+                }
             })
 
             break;
@@ -83,7 +88,11 @@ client.on("interactionCreate", (interaction) => {
                 if(command.name != interaction.options.getSubcommand(true) || !command.autoComplete) return;
 
                 logger.debug("Running command", command.name);
-                command.autoComplete(interaction)
+                try {
+                    command.autoComplete(interaction);
+                } catch (e) {
+                    logger.error(e);
+                }
             })
 
             break;
