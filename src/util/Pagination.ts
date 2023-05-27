@@ -14,7 +14,8 @@ export default async function CreatePaginator(pages: Array<string>, interaction:
     const nextButton = new ButtonBuilder()
         .setCustomId("paginator-next")
         .setLabel("NEXT")
-        .setStyle(ButtonStyle.Primary); 
+        .setStyle(ButtonStyle.Primary)
+        .setDisabled(pages.length == 1); 
 
     const row = new ActionRowBuilder<ButtonBuilder>()
         .addComponents(lastButton, nextButton);
