@@ -64,7 +64,7 @@ client.on(Events.InteractionCreate, (interaction) => {
             module.commands.forEach(command => {
                 if(command.name != interaction.options.getSubcommand(true)) return;
                 // Check if permissions are added
-                if(!member.permissions.has(command.permissions)) {
+                if(command.permissions && !member.permissions.has(command.permissions)) {
                     interaction.reply({ content: ":x: **You cannot use this command.**", ephemeral: true });
                     return;
                 }
