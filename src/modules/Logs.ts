@@ -4,9 +4,6 @@ import Module from "../Module";
 export default class Logs extends Module {
     name = "Logs"
 
-    createCommands(): void {
-    }
-
     async onReady() {
         const channel = await this.findChannel(process.env.LOGS_CHANNEL_ID);
         if(!channel || !channel.isTextBased()) {
@@ -14,7 +11,7 @@ export default class Logs extends Module {
         }
 
         if(process.env.DEBUG != "true") {
-            channel.send("**Bot is online**")
+            channel.send("**Bot is online.**")
         }
     }
 }
