@@ -3,7 +3,6 @@ import Module from "../Module";
 import Sale from "../models/Sale";
 import CreatePaginator from "../util/Pagination";
 
-
 export default class Stats extends Module {
     name = "Stats"
 
