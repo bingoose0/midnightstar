@@ -21,7 +21,7 @@ export default class Stats extends Module {
 
                     const exists = await Sale.exists({ sellerID: user.id });
                     if(!exists) {
-                        return interaction.reply({ content: "User has made no logged sales.", ephemeral: true });
+                        return interaction.editReply({ content: "User has made no logged sales." });
                     }
 
                     let pages = []

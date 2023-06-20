@@ -17,6 +17,7 @@ client.login(process.env.TOKEN);
 const modules = new Array<Module>();
 const commands = new Array<SlashCommandBuilder>();
 
+
 const rest = new REST({ version: "10" }).setToken(token);
 const logger = new Logger("Main");
 
@@ -52,7 +53,7 @@ client.once(Events.ClientReady, async (client: Client<true>) => {
 })
 
 // Handles interactions
-client.on(Events.InteractionCreate, (interaction) => {
+client.on(Events.InteractionCreate, async (interaction) => {
     if(interaction.isChatInputCommand()) {
         const member = interaction.guild.members.cache.get(interaction.user.id);
         if(!member) return; // TODO: error message
@@ -61,7 +62,7 @@ client.on(Events.InteractionCreate, (interaction) => {
             const module = modules[key];
             if(module.name.toLowerCase() != interaction.commandName) continue;
 
-            module.commands.forEach(command => {
+            module.commands.forEach(async command => {
                 if(command.name != interaction.options.getSubcommand(true)) return;
                 // Check if permissions are added
                 if(command.permissions && !member.permissions.has(command.permissions)) {
@@ -69,13 +70,15 @@ client.on(Events.InteractionCreate, (interaction) => {
                     return;
                 }
 
+                await interaction.deferReply({"ephemeral": true})
+            
                 logger.debug("Running command", command.name, "from", `${interaction.user.username} (${interaction.user.id})`);
                 // Run command callback
                 try {
                     command.executor(interaction);
                 } catch(e) {
                     logger.error(`${command.name} error: ${e}`);
-                    interaction.reply({ content: "Unfortunately an error was created, please report this to the bot developer!", ephemeral: true })
+                    interaction.editReply({ content: "Unfortunately an error was created, please report this to the bot developer!" })
                 }
             })
 
@@ -100,6 +103,8 @@ client.on(Events.InteractionCreate, (interaction) => {
             break;
         }
     } else if(interaction.isModalSubmit()) {
+        await interaction.deferReply({ ephemeral: true });
+    
         for(const key in modules) {
             const module = modules[key];
             module.onModalSubmit(interaction);

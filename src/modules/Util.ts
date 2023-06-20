@@ -64,7 +64,7 @@ export default class Util extends Module {
                     embed.setTitle("Midnight Star - Prices")
                     embed.addFields(...embedFields)
     
-                    await interaction.reply({ embeds: [embed], ephemeral: true })
+                    await interaction.editReply({ embeds: [embed] })
                 }
             },
             {
@@ -100,7 +100,7 @@ export default class Util extends Module {
                     const channelOpt = interaction.options.getChannel("channel");
                     const channel = interaction.guild.channels.cache.get(channelOpt.id);
                     if(!channel || !channel.isTextBased()) {
-                        return await interaction.reply({ content: "Invalid channel! The channel **must** be text-based.", ephemeral: true })
+                        return await interaction.editReply({ content: "Invalid channel! The channel **must** be text-based." })
                     }
             
                     const okButton = new ButtonBuilder()
@@ -127,24 +127,24 @@ export default class Util extends Module {
             const idSplit = interaction.customId.split("say_");
             const channelID = idSplit[1]
             if(!channelID) {
-                interaction.reply({ content: `Channel ID was not valid, please report this to Bingu. In case you needed it, here is your text:\n${message}`, ephemeral: true })
+                interaction.editReply({ content: `Channel ID was not valid, please report this to Bingu. In case you needed it, here is your text:\n${message}` })
                 return;
             };
 
             const channel = interaction.guild.channels.cache.get(channelID);
             if(!channel || !channel.isTextBased()) {
-                interaction.reply({ content: `The channel could not be found or is not text-based. In case you needed it, here is your text:\n${message}`, ephemeral: true })
+                interaction.editReply({ content: `The channel could not be found or is not text-based. In case you needed it, here is your text:\n${message}` })
                 return;
             }
     
             channel.send(message);
 
-            interaction.reply({ content: "**Success!**", ephemeral: true })
+            await interaction.editReply({ content: "**Success!**" })
         } else if(interaction.customId == "ms-verify") {
             const logChannel = await this.findChannel(process.env.LOGS_CHANNEL_ID);
             if(!logChannel || !logChannel.isTextBased()) {
                 this.logger.error("Logs channel is not set/valid! (LOGS_CHANNEL_ID)");
-                await interaction.reply({ content: "Unfortunately the logs channel ID is not configured correctly, please notify the bot developer of this.", ephemeral: true });
+                await interaction.editReply({ content: "Unfortunately the logs channel ID is not configured correctly, please notify the bot developer of this." });
                 return;
             }
 
@@ -175,7 +175,7 @@ export default class Util extends Module {
                 .addComponents(accept, deny);
             
             await logChannel.send({ embeds: [embed], components: [row] })
-            await interaction.reply({ content: "Success! Please wait for your application to be looked over.", ephemeral: true })
+            await interaction.editReply({ content: "Success! Please wait for your application to be looked over." })
         }
     }
 
@@ -190,7 +190,7 @@ export default class Util extends Module {
                 }
 
                 if(!member.roles.cache.has(process.env.UNASSIGNED_ROLE)) {
-                    await interaction.reply({ content: "You're already verified.", ephemeral: true })
+                    await interaction.reply({ content: "You're already verified.", ephemeral: true  })
                     return;
                 }
     
@@ -218,6 +218,7 @@ export default class Util extends Module {
 
                 await interaction.showModal(modal);
             } else if(interaction.isMessageComponent() && interaction.customId.startsWith("verif")) {
+                await interaction.deferReply({"ephemeral": true})
                 // Modify message
                 const accept = new ButtonBuilder()
                     .setCustomId("_verifaccept")
@@ -246,7 +247,7 @@ export default class Util extends Module {
 
                 const member = interaction.guild.members.cache.get(id);
                 if(!member) {
-                    await interaction.reply({ content: "This person either left the discord, or does not exist on the bot's cache.", ephemeral: true })
+                    await interaction.editReply({ content: "This person either left the discord, or does not exist on the bot's cache." })
                     return;
                 }
 
@@ -262,20 +263,22 @@ export default class Util extends Module {
                     await member.roles.remove(unrankedRoleID);
                     await member.roles.add(entryRoleID);
 
-                    await interaction.reply({ content: `Accepted member ${member}`, ephemeral: true });
+                    await interaction.editReply({ content: `Accepted member ${member}` });
                     try {
                         await member.send("Your application to Midnight Star has been **accepted**! Please contact a Scav Director for training.")
                     } catch(e) {
                         return;
                     }
                 } else if (idSplit[0] == "verifdeny") {
-                    await interaction.reply({ content: `Denied member ${member}`, ephemeral: true });
+                    await interaction.editReply({ content: `Denied member ${member}` });
                     try {
                         await member.send("Hello. Your application to Midnight Star has been **denied**. For further information, contact a director.");
                     } catch(e) {
                         return;
                     }
                 }
+
+                await interaction.editReply("Done.")
             }
         })
     }

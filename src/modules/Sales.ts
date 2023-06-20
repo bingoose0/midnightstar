@@ -22,13 +22,13 @@ export default class Sales extends Module {
                 async executor(interaction) {
                     const oldSale = module.currentSales.get(interaction.user.id);
                     if(oldSale) {
-                        await interaction.reply({ content: "**Error!** You already have a current sale going on. Cancel it with /sales cancel.", ephemeral: true });
+                        await interaction.editReply({ content: "**Error!** You already have a current sale going on. Cancel it with /sales cancel." });
                         return;
                     }
 
                     const sale = new CurrentSale();
                     module.currentSales.set(interaction.user.id, sale);
-                    await interaction.reply({ content: "**Success!** Add items with /sales additem.", ephemeral: true });
+                    await interaction.editReply({ content: "**Success!** Add items with /sales additem." });
                 },
             },
             
@@ -52,7 +52,7 @@ export default class Sales extends Module {
                 async executor(interaction) {
                     const sale = module.currentSales.get(interaction.user.id);
                     if(!sale) {
-                        await interaction.reply({ content: "**Error!** No current sale was found. Start one with /sales start.", ephemeral: true });
+                        await interaction.editReply({ content: "**Error!** No current sale was found. Start one with /sales start." });
                         return;
                     }
 
@@ -60,18 +60,18 @@ export default class Sales extends Module {
                     const quantity = interaction.options.getNumber("quantity");
                     const item = ItemMap.get(itemID);
                     if(!item) {
-                        await interaction.reply({ content: "**Error!** The item was not found! This should usually never happen, please contact the bot owner!", ephemeral: true });
+                        await interaction.editReply({ content: "**Error!** The item was not found! This should usually never happen, please contact the bot owner!" });
                         return;
                     }
 
                     const member = interaction.guild.members.cache.get(interaction.user.id);
                     if(!member) {
-                        await interaction.reply({ content: "**Error!** The member could not be found. This is an internal bot issue, please contact the bot owner.", ephemeral: true });
+                        await interaction.editReply({ content: "**Error!** The member could not be found. This is an internal bot issue, please contact the bot owner." });
                         return;
                     }
             
                     if(sale.items.length + quantity > 30 && !member.permissions.has(PermissionFlagsBits.Administrator)) {
-                        await interaction.reply({ content: "**Error!** This amount goes over the order limit (30), please contact an admin to process this order.", ephemeral: true })
+                        await interaction.editReply({ content: "**Error!** This amount goes over the order limit (30), please contact an admin to process this order." })
                         return;
                     }
         
@@ -79,7 +79,7 @@ export default class Sales extends Module {
                         sale.items.push(item);
                     }
 
-                    await interaction.reply({ content: `**Success!** Added **${quantity}x ${item.name}** to the sale cart!`, ephemeral: true });
+                    await interaction.editReply({ content: `**Success!** Added **${quantity}x ${item.name}** to the sale cart!` });
                 },
 
                 async autoComplete(interaction) {
@@ -107,11 +107,11 @@ export default class Sales extends Module {
                 async executor(interaction) {
                     const sale = module.currentSales.get(interaction.user.id);
                     if(!sale) {
-                        await interaction.reply({ content: "**Error!** No current sale was found. Start one with /sales start.", ephemeral: true });
+                        await interaction.editReply({ content: "**Error!** No current sale was found. Start one with /sales start." });
                         return;
                     }
 
-                    await interaction.reply({ content: `The total price of your sale is: **${sale.calculatePrice()}C!**`, ephemeral: true })
+                    await interaction.editReply({ content: `The total price of your sale is: **${sale.calculatePrice()}C!**` })
                 },
             },
             
@@ -123,12 +123,12 @@ export default class Sales extends Module {
                 async executor(interaction) {
                     const sale = module.currentSales.get(interaction.user.id);
                     if(!sale) {
-                        await interaction.reply({ content: "**Error!** No current sale was found. Start one with /sales start.", ephemeral: true });
+                        await interaction.editReply({ content: "**Error!** No current sale was found. Start one with /sales start." });
                         return;
                     }
 
                     module.currentSales.delete(interaction.user.id)
-                    await interaction.reply({ content: "**Success.** Cleared your current sale.", ephemeral: true });
+                    await interaction.editReply({ content: "**Success.** Cleared your current sale." });
                 }
             },
             
@@ -151,7 +151,7 @@ export default class Sales extends Module {
                 async executor(interaction) {
                     const sale = module.currentSales.get(interaction.user.id);
                     if(!sale) {
-                        await interaction.reply({ content: "**Error!** No current sale was found. Start one with /sales start.", ephemeral: true });
+                        await interaction.editReply({ content: "**Error!** No current sale was found. Start one with /sales start." });
                         return;
                     }
 
@@ -161,7 +161,7 @@ export default class Sales extends Module {
                     const price = sale.calculatePrice();
 
                     if(price <= 1) {
-                        return await interaction.reply({ content: "**Error!** The price must not be 0 or below."});
+                        return await interaction.editReply({ content: "**Error!** The price must not be 0 or below."});
                     }
 
                     const iString = sale.itemString();
@@ -189,7 +189,7 @@ export default class Sales extends Module {
                     });
 
                     await saleDB.save();
-                    await interaction.reply({ content: "Sale has been logged and saved in the database.", ephemeral: true });
+                    await interaction.editReply({ content: "Sale has been logged and saved in the database." });
                     
                     module.currentSales.delete(interaction.user.id);
                 }
