@@ -6,5 +6,5 @@ export default interface Command {
     executor(interaction: ChatInputCommandInteraction);
     autoComplete?(interaction: AutocompleteInteraction);
     permissions?: PermissionResolvable;
-    ephemeral?: boolean;
+    defer?: boolean;
 }
