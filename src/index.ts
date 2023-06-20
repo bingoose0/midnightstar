@@ -70,7 +70,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
                     return;
                 }
 
-                if(command.defer ? command.defer : true) {
+                if(command.defer ?? true) {
                     await interaction.deferReply({"ephemeral": true});
                 }
         
