@@ -16,6 +16,7 @@ export default class Stats extends Module {
                 builder: new SlashCommandSubcommandBuilder()
                     .setDescription("Looks up the user's sales.")
                     .addUserOption(o => o.setName("user").setDescription("The user to lookup").setRequired(true)),
+                ephemeral: false,
                 async executor(interaction) {
                     const user = interaction.options.getUser("user", true);
 

@@ -70,7 +70,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
                     return;
                 }
 
-                await interaction.deferReply({"ephemeral": true})
+                await interaction.deferReply({"ephemeral": command.ephemeral || true})
             
                 logger.debug("Running command", command.name, "from", `${interaction.user.username} (${interaction.user.id})`);
                 // Run command callback
